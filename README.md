@@ -9,6 +9,7 @@
 This project aims to create a comprehensive health analysis system that integrates multiple data sources (dietary information from Notion diaries and fitness data from Garmin) and uses LLMs for intelligent analysis.
 
 ## 项目结构 | Project Structure
+```
 Fit/
 ├── config/                  # 配置文件目录 | Configuration directory
 │   ├── config.py           # 配置加载模块 | Configuration loading module
@@ -43,6 +44,7 @@ Fit/
 ├── test_garmin_openai_integration.py # Garmin和OpenAI集成测试 | Integration test
 ├── requirements.txt         # 项目依赖 | Project dependencies
 └── README.md               # 项目说明 | Project documentation
+```
 ## 功能模块 | Functional Modules
 
 1. **Notion模块 | Notion Module**：负责从Notion API获取用户的日记内容，并提取其中的饮食信息。
