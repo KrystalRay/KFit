@@ -11,39 +11,42 @@ This project aims to create a comprehensive health analysis system that integrat
 ## 项目结构 | Project Structure
 ```
 Fit/
-├── config/                  # 配置文件目录 | Configuration directory
-│   ├── config.py           # 配置加载模块 | Configuration loading module
-│   └── config.yaml         # 配置文件 | Configuration file
-├── modules/                 # 核心功能模块 | Core functional modules
-│   ├── notion/             # Notion API交互模块 | Notion API interaction module
-│   │   ├── init .py
-│   │   └── notion_client.py # Notion客户端 | Notion client
-│   ├── garmin/             # Garmin数据获取模块 | Garmin data retrieval module
-│   │   ├── init .py
-│   │   └── garmin_client.py # Garmin客户端 | Garmin client
-│   ├── diary/              # 日记文件处理模块 | Diary file processing module
-│   │   ├── init .py
-│   │   ├── diary_parser.py # 日记解析器 | Diary parser
-│   │   └── diary_weekly_analyzer.py # 周分析器 | Weekly analyzer
-│   └── analysis/           # 数据分析模块 | Data analysis module
-│       ├── init .py
-│       └── analyzer.py     # 健康数据分析器 | Health data analyzer
-├── models/                  # 大模型接口层 | LLM interface layer
-│   ├── init .py
-│   ├── base_model.py       # 模型基类 | Model base class
-│   ├── openai_model.py     # OpenAI模型实现 | OpenAI model implementation
-│   ├── claude_model.py     # Claude模型实现 | Claude model implementation
-│   └── local_model.py      # 本地模型实现 | Local model implementation
-├── utils/                   # 工具函数 | Utility functions
-│   ├── init .py
-│   └── helpers.py          # 辅助函数 | Helper functions
-├── cache/                   # 缓存目录 | Cache directory
-├── output/                  # 输出报告目录 | Output reports directory
-├── main.py                  # 主程序入口 | Main program entry
-├── UnitTest.py              # 单元测试 | Unit tests
-├── test_garmin_openai_integration.py # Garmin和OpenAI集成测试 | Integration test
-├── requirements.txt         # 项目依赖 | Project dependencies
-└── README.md               # 项目说明 | Project documentation
+── config/                  # 配置文件目录
+│   ├── config.py           # 配置加载模块
+│   └── config.yaml         # 配置文件
+├── modules/                # 核心功能模块
+│   ├── notion/             # Notion API交互模块
+│   │   ├── __init__.py
+│   │   └── notion_client.py
+│   ├── garmin/             # Garmin数据获取模块
+│   │   ├── __init__.py
+│   │   └── garmin_client.py
+│   ├── diary/              # 日记文件处理模块
+│   │   ├── __init__.py
+│   │   ├── diary_parser.py
+│   │   └── diary_weekly_analyzer.py
+│   ├── analysis/           # 数据分析模块
+│   │   ├── __init__.py
+│   │   └── analyzer.py
+│   └── prompt/             # Prompt模块
+│       ├── __init__.py
+│       └── prompt_builder.py
+├── models/                 # 大模型接口层
+│   ├── __init__.py
+│   ├── base_model.py
+│   ├── openai_model.py
+│   ├── claude_model.py
+│   └── local_model.py
+├── utils/                  # 工具函数
+│   ├── __init__.py
+│   └── helpers.py
+├── cache/                  # 缓存目录
+├── output/                 # 输出报告目录
+├── main.py                 # 主程序入口
+├── UnitTest.py             # 单元测试
+├── test_garmin_openai_integration.py # 集成测试
+├── requirements.txt        # 项目依赖
+└── README.md               
 ```
 ## 功能模块 | Functional Modules
 
@@ -79,7 +82,7 @@ Fit/
 
 1. 安装依赖 | Install dependencies：`pip install -r requirements.txt`
 2. 配置`config/config.yaml`文件，填入必要的API密钥和配置信息 | Configure the `config/config.yaml` file with necessary API keys and settings
-3. 运行主程序 | Run the main program：
+3. 运行主程序 | Run the main program：（开发中）
    - 使用Notion和Garmin数据分析 | Using Notion and Garmin data analysis：`python main.py`
    - 使用日记文件分析 | Using diary file analysis：`python main.py --diary`
    - 指定分析日期 | Specify analysis date：`python main.py --date 2023-01-01`
