@@ -1,0 +1,14 @@
+===== 2025-04-02 健康分析报告 =====
+
+总体健康状况:
+错误: 
+
+饮食分析:
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+健身分析:
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+改进建议:
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+

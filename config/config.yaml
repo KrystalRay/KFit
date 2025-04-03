@@ -1,0 +1,66 @@
+# KFit 配置文件
+
+# Notion API配置
+notion:
+  api_key: "your_notion_api_key_here"
+  page_id: "your_notion_page_id_here"
+  # 日记页面中饮食信息的属性名称
+  food_property_name: "饮食"
+  # 每次查询的最大页面数量
+  page_size: 10
+
+# 日记文件配置
+diary:
+  # 日记文件路径，如果为空则不使用本地日记文件
+  file_path: ""
+  # 日记中饮食部分的标题
+  food_section_title: "饮食"
+
+# Garmin连接配置
+garmin:
+  # 请替换为您的Garmin Connect账号
+  email: "your_garmin_email@example.com"
+  # 请替换为您的Garmin Connect密码
+  password: "your_garmin_password"
+  # 是否使用代理
+  use_proxy: false
+  proxy: ""
+  # 数据缓存时间（秒）
+  cache_ttl: 3600
+
+# 大模型配置
+model:
+  # 默认使用的模型类型: openai, claude, local
+  default: "openai"
+  
+  # OpenAI配置
+  openai:
+    api_key: "your_openai_api_key_here"
+    api_base: "https://api.openai.com/v1"
+    model: "gpt-3.5-turbo"
+    temperature: 0.7
+    max_tokens: 1000
+  
+  # Claude配置
+  claude:
+    api_key: "your_claude_api_key_here"
+    model: "claude-3-opus-20240229"
+    temperature: 0.7
+    max_tokens: 1000
+  
+  # 本地模型配置
+  local:
+    model_path: "path_to_your_local_model"
+    # 或者使用API端点
+    api_endpoint: "http://localhost:8000/v1"
+
+# 分析配置
+analysis:
+  # 分析结果保存路径
+  output_dir: "./output"
+  # 是否生成每日报告
+  daily_report: true
+  # 是否生成周报
+  weekly_report: true
+  # 分析语言：zh-CN或en-US
+  language: "zh-CN"
