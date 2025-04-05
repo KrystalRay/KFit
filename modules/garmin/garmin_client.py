@@ -180,7 +180,10 @@ class GarminClient:
             # 获取步数数据
             steps_data = self.client.get_steps_data(date.isoformat())
             
-            
+            # for i in steps_data:
+            #     print(i)
+            #分时间段的 每个时间段内的步数
+
             # 提取总步数和活动级别统计
             total_steps = 0
             activity_stats = {
@@ -301,6 +304,26 @@ class GarminClient:
             print(api_date)
             sleep_data = self.client.get_sleep_data(api_date)
             print_unique_keys(sleep_data)
+
+#Print to find what can be extract from garmin api
+# - remSleepData
+# - sleepHeartRate
+# - sleepMovement
+# - sleepStress
+# - skinTempDataExists
+# - wellnessEpochRespirationDataDTOList
+# - wellnessEpochRespirationAveragesList
+# - respirationVersion
+# - restingHeartRate
+# - sleepLevels
+# - bodyBatteryChange
+# - dailySleepDTO
+# - sleepBodyBattery
+            # for i,j in sleep_data.items():
+            #     if i == "sleepLevels":
+            #         print(i,j)
+
+
             result = {
                 "date": date_str,
                 "duration": 0,
@@ -407,6 +430,9 @@ class GarminClient:
             # 获取活动数据
             activities = self.client.get_activities_by_date(date.isoformat(), date.isoformat())
             
+            # for i in activities:
+            #     print(i)
+
             # 提取活动信息
             result = []
             for activity in activities:
@@ -505,3 +531,158 @@ class GarminClient:
             current_date += timedelta(days=1)
         
         return result
+
+    def get_stress_data(self, date: Optional[datetime] = None) -> Dict[str, Any]:
+        """
+        获取指定日期的压力数据
+        
+        Args:
+            date: 日期，默认为今天
+            
+        Returns:
+            Dict[str, Any]: 压力数据字典，包含时间序列和统计信息
+        """
+        # 设置默认日期为今天
+        if date is None:
+            date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        date_str = date.strftime("%Y-%m-%d")
+        cache_key = f"stress_{date_str}"
+        
+        # 尝试从缓存获取
+        cached_data = self._get_from_cache(cache_key)
+        if cached_data:
+            return cached_data
+        
+        # 如果客户端未初始化或登录失败，返回空数据
+        if not self.client:
+            return {"date": date_str, "values": [], "avg": 0, "max": 0, "min": 0}
+        
+        try:
+            # 获取压力数据
+            stress_data = self.client.get_stress_data(date_str)
+            
+            for i in stress_data:
+                print(f"    {i}")
+# userProfilePK
+# calendarDate
+# startTimestampGMT
+# endTimestampGMT
+# startTimestampLocal
+# endTimestampLocal
+# maxStressLevel
+# avgStressLevel
+# stressChartValueOffset
+# stressChartYAxisOrigin
+# stressValueDescriptorsDTOList
+# stressValuesArray
+# bodyBatteryValueDescriptorsDTOList
+# bodyBatteryValuesArray
+
+            # 处理压力数据
+            values = []
+            if isinstance(stress_data, list):
+                values = [{
+                    "value": entry.get("value", 0),
+                    "timestamp": entry.get("startGMT", 0),
+                    "time": datetime.fromtimestamp(entry.get("startGMT", 0)/1000).strftime('%Y-%m-%d %H:%M:%S')
+                } for entry in stress_data]
+            
+            # 计算统计信息
+            stress_values = [v["value"] for v in values if v["value"] > 0]
+            avg_stress = round(sum(stress_values)/len(stress_values), 1) if stress_values else 0
+            max_stress = max(stress_values) if stress_values else 0
+            min_stress = min(stress_values) if stress_values else 0
+            
+            result = {
+                "date": date_str,
+                "values": values,
+                "avg": avg_stress,
+                "max": max_stress,
+                "min": min_stress
+            }
+            
+            # 保存到缓存
+            self._save_to_cache(cache_key, result)
+            
+            return result
+        
+        except Exception as e:
+            print(f"获取压力数据失败: {e}")
+            return {"date": date_str, "values": [], "avg": 0, "max": 0, "min": 0}
+
+
+    def get_daily_weigh_ins(self, date: Optional[datetime] = None, enddate: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """
+        获取指定日期的体重数据
+        
+        Args:
+            date: 日期，默认为今天
+            
+        Returns:
+            List[Dict[str, Any]]: 体重数据列表，包含每次测量的详细信息
+        """
+        # 设置默认日期为今天
+        if date is None:
+            date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        date_str = date.strftime("%Y-%m-%d")
+        enddate_str = enddate.strftime("%Y-%m-%d")
+        cache_key = f"weight_{date_str}"
+        
+        # 尝试从缓存获取
+        cached_data = self._get_from_cache(cache_key)
+        if cached_data:
+            return cached_data
+        
+        # 如果客户端未初始化或登录失败，返回空列表
+        if not self.client:
+            return []
+        
+        try:
+            # 获取体重数据
+            weight_data = self.client.get_weigh_ins(date_str, enddate_str)
+            
+            # 处理返回的字典结构
+            result = []
+            if isinstance(weight_data, dict):
+                # 处理每日体重摘要
+                daily_summaries = weight_data.get('dailyWeightSummaries', [])
+                for summary in daily_summaries:
+                    # 获取最新体重记录
+                    latest_weight = summary.get('latestWeight', {})
+                    if latest_weight:
+                        timestamp = latest_weight.get('timestampGMT', "")
+                        # 将时间戳转换为标准时间格式
+                        if timestamp:
+                            try:
+                                dt = datetime.fromtimestamp(timestamp / 1000)
+                                time_str = dt.strftime('%Y-%m-%d %H:%M:%S')
+                            except (TypeError, ValueError):
+                                time_str = "未知时间"
+                        else:
+                            time_str = "未知时间"
+                            
+                        result.append({
+                            "timestamp": timestamp,
+                            "time": time_str,  # 新增标准时间格式字段
+                            "date": latest_weight.get('calendarDate', ""),
+                            "weight": latest_weight.get('weight', 0) / 1000 if latest_weight.get('weight') else 0,
+                            "bmi": latest_weight.get('bmi'),
+                            "body_fat": latest_weight.get('bodyFat'),
+                            "water_percentage": latest_weight.get('bodyWater'),
+                            "bone_mass": latest_weight.get('boneMass'),
+                            "muscle_mass": latest_weight.get('muscleMass'),
+                            "visceral_fat": latest_weight.get('visceralFat'),
+                            "metabolic_age": latest_weight.get('metabolicAge'),
+                            "source_type": latest_weight.get('sourceType')
+                        })
+            
+            # 保存到缓存
+            self._save_to_cache(cache_key, result)
+            
+            return result
+        
+        except Exception as e:
+            print(f"获取体重数据失败: {e}")
+            return []

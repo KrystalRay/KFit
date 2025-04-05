@@ -14,7 +14,7 @@ class PromptBuilder:
         """
         prompt = f"""请根据以下健身数据提供健康分析：
         
-        日期: {fitness_data['date']}
+        时间段: {fitness_data['dates']}
         步数: {fitness_data['steps']}
         消耗卡路里: {fitness_data['calories']}
         
@@ -36,6 +36,6 @@ class PromptBuilder:
         for activity in fitness_data['activities']:
             prompt += f"- {activity['type']}: {activity['duration']}分钟, 消耗{activity['calories']}卡路里\n"
         
-        prompt += "\n请提供以下分析：\n1. 总体健康状况评估\n2. 运动量是否充足\n3. 睡眠质量分析\n4. 改进建议"
+        prompt += "\n请提供以下分析：\n1. 总体健康状况评估\n2. 运动量是否充足\n3. 睡眠质量分析\n4. 改进建议\n"
         
         return prompt

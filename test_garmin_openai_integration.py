@@ -5,9 +5,10 @@ from models.openai_model import OpenAIModel
 from config.config import Config
 from modules.garmin.garmin_client import GarminClient
 from datetime import datetime, timedelta
+from modules.prompt.prompt_builder import PromptBuilder
 
 
-def test_garmin_openai_integration(config_path: Optional[str] = None, days: int = 0):
+def test_garmin_openai_integration(config_path: Optional[str] = None, days: int = 1):
     """
     测试Garmin模块与OpenAI模块的集成功能
     
@@ -49,7 +50,8 @@ def test_garmin_openai_integration(config_path: Optional[str] = None, days: int 
         
         # 获取健身数据
         fitness_data = {
-            'date': today.strftime('%Y-%m-%d'),
+            'dates': dates,
+            'day': 1,
             'steps': 0,
             'calories': 0,
             'activities': [],
@@ -103,32 +105,14 @@ def test_garmin_openai_integration(config_path: Optional[str] = None, days: int 
         openai_client = OpenAIModel(openai_config)
         
         # 构建提示词
-        prompt = f"""请根据以下健身数据提供健康分析：
-        
-        日期: {fitness_data['date']}
-        步数: {fitness_data['steps']}
-        消耗卡路里: {fitness_data['calories']}
-        
-        心率:
-        平均: {fitness_data['heart_rate']['avg']}
-        最低: {fitness_data['heart_rate']['min']}
-        最高: {fitness_data['heart_rate']['max']}
-        
-        睡眠:
-        时长: {fitness_data['sleep']['duration']}小时
-        深睡: {fitness_data['sleep']['deep']}小时
-        浅睡: {fitness_data['sleep']['light']}小时
-        REM睡眠: {fitness_data['sleep']['rem']}小时
-        清醒时间: {fitness_data['sleep']['awake']}小时
-        
-        活动:
-        """
+        prompt = PromptBuilder.build_fitness_prompt(fitness_data)
         
         for activity in fitness_data['activities']:
             prompt += f"- {activity['type']}: {activity['duration']}分钟, 消耗{activity['calories']}卡路里\n"
         
         prompt += "\n请提供以下分析：\n1. 总体健康状况评估\n2. 运动量是否充足\n3. 睡眠质量分析\n4. 改进建议"
-        
+        print("prompt")
+        print(prompt)
         # 调用OpenAI进行分析
         print("\n正在调用OpenAI进行分析...")
         response = openai_client.generate(prompt)
@@ -136,7 +120,16 @@ def test_garmin_openai_integration(config_path: Optional[str] = None, days: int 
         # 输出分析结果
         print("\n===== 健康分析结果 =====\n")
         print(response)
-        
+
+        # 保存报告
+        report_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        report_dir = os.path.join(os.path.dirname(__file__), "output")
+        os.makedirs(report_dir, exist_ok=True)
+        report_path = os.path.join(report_dir, f"health_report_{report_date}.txt")
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write(response)
+        print(f"\n分析报告已保存至: {report_path}")
+
         print("\n===== Garmin与OpenAI集成测试完成 =====\n")
     except Exception as e:
         print(f"\n测试过程中发生错误: {e}")

@@ -71,7 +71,7 @@ def clear_cache():
                 print(f"删除缓存文件{file_path}失败: {e}")
 
 
-def test_garmin_api(config_path: Optional[str] = None, days: int = 0):
+def test_garmin_api(config_path: Optional[str] = None, days: int = 1):
     """
     测试Garmin API模块的功能
     
@@ -132,6 +132,7 @@ def test_garmin_api(config_path: Optional[str] = None, days: int = 0):
         for date in dates:
             try:
                 sleep_data = garmin_client.get_sleep_data(date)
+                format_date = date.strftime("%Y-%m-%d")
                 print(f"\n日期: {sleep_data.get('date')}")
                 print(f"睡眠时长: {sleep_data.get('duration')}小时")
                 print(f"深度睡眠: {sleep_data.get('deep')}小时")
@@ -142,7 +143,7 @@ def test_garmin_api(config_path: Optional[str] = None, days: int = 0):
                 print(f"最低心率: {sleep_data.get('heart_rate', {}).get('min', 0)}")
                 print(f"最高心率: {sleep_data.get('heart_rate', {}).get('max', 0)}")
                 print(f"静息心率: {sleep_data.get('resting_heart_rate', 0)}")
-                print(f"压力指数: {sleep_data.get('stress', 0)}")
+                print(f"压力指数: {garmin_client.get_stress_data(date)}")
                 print(f"身体电量变化: {sleep_data.get('body_battery_change', 0)}")
                 print(f"身体电量开始值: {sleep_data.get('body_battery', {}).get('start', 0)}")
                 print(f"身体电量结束值: {sleep_data.get('body_battery', {}).get('end', 0)}")
@@ -173,6 +174,14 @@ def test_garmin_api(config_path: Optional[str] = None, days: int = 0):
             print(f"消耗卡路里: {fitness_data.get('calories')}")
             print(f"活动数量: {len(fitness_data.get('activities', []))}")
         
+        # 测试获取体重数据
+        print("\n6. 测试获取体重数据:")
+        for date in dates:
+            weight_data = garmin_client.get_daily_weigh_ins(date,date)
+            for measurement in weight_data:
+                print(f"时间: {measurement['time']}, 体重: {measurement['weight']}kg")
+                print(f"体脂率: {measurement['body_fat']}%")
+
         # 测试获取一周的健身数据
         # print("\n6. 测试获取一周的健身数据:")
         # weekly_data = garmin_client.get_weekly_fitness_data(today)
@@ -193,5 +202,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     clear_cache()
-    test_openai_api()
-    # test_garmin_api(args.config, args.days)
+    # test_openai_api()
+    test_garmin_api(args.config, args.days)
