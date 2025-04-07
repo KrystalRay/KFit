@@ -480,16 +480,28 @@ class GarminClient:
         sleep_data = self.get_sleep_data(date)
         activities = self.get_activities(date)
         
-        # 获取总消耗卡路里
-        total_calories = 0
+        try:
+            # 使用client对象获取每日总结数据
+            daily_summary = self.client.get_stats(date_str)
+        except Exception as e:
+            print(f"获取每日总结数据失败: {e}")
+            daily_summary = {}
+        
+        # 获取活动消耗卡路里
+        activity_calories = 0
         for activity in activities:
-            total_calories += activity.get("calories", 0)
+            activity_calories += activity.get("calories", 0)
         
         # 整合数据
         return {
             "date": date_str,
             "steps": steps_data.get("steps", 0),
-            "calories": total_calories,
+            "calories": {
+                "total": daily_summary.get("totalKilocalories", 0),  # 全天总消耗
+                "active": daily_summary.get("activeKilocalories", 0),  # 活动消耗
+                "bmr": daily_summary.get("bmrKilocalories", 0),  # 基础代谢
+                "activities": activity_calories  # 运动消耗
+            },
             "heart_rate": {
                 "avg": heart_rate_data.get("avg", 0),
                 "min": heart_rate_data.get("min", 0),
@@ -686,3 +698,5 @@ class GarminClient:
         except Exception as e:
             print(f"获取体重数据失败: {e}")
             return []
+    def get_name(self):
+        return self.client.get_full_name()
